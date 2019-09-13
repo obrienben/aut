@@ -567,6 +567,19 @@ package object archivesunleashed {
       rdd.filter(r => urls.contains(ExtractDomain(r.getUrl).replace("^\\s*www\\.", "")))
     }
 
+    /** Removes all data but selected source domains patterns.
+      *
+      * @param urlREs a list of regular expressions
+      */
+    def keepDomainPatterns(urlREs: Set[Regex]): RDD[ArchiveRecord] = {
+      rdd.filter(r =>
+        urlREs.map(re =>
+          ExtractDomain(r.getUrl).replace("^\\s*www\\.", "") match {
+            case re() => true
+            case _ => false
+          }).exists(identity))
+    }
+
     /** Removes all data not in selected language.
       *
       * @param lang a set of ISO 639-2 codes

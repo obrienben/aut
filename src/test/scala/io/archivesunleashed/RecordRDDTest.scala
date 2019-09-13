@@ -37,6 +37,8 @@ class RecordRDDTest extends FunSuite with BeforeAndAfter {
   private val archive = "http://www.archive.org/"
   private val sloan = "http://www.sloan.org"
   private val regex = raw"Please visit our website at".r
+  private val orgRegex = ".*\\.org$"
+  private val govRegex = ".*\\.gov\\.uk$"
 
   before {
     val conf = new SparkConf()
@@ -105,6 +107,15 @@ class RecordRDDTest extends FunSuite with BeforeAndAfter {
     val urls: Set[String] = Set("www.archive.org", "www.sloan.org")
     val x2 = base2.keepDomains(urls).count()
     assert (x2 == expected )
+  }
+
+  test ("keep domain patterns") {
+    val expected = 132
+    val base = RecordLoader.loadArchives(arcPath, sc)
+      .keepValidPages()
+    val urls = Set (orgRegex.r, govRegex.r, "".r)
+    val r2 = base.keepDomainPatterns(urls).count
+    assert (r2 == expected)
   }
 
   test ("keep languages") {
